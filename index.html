@@ -1,8 +1,195 @@
 <!DOCTYPE html>
-<html>
-<head><title>Криворукий сайт</title></head>
-<body style="font-family: sans-serif">
-<h1>Официальный Сайт!</h1>
-<p>Скоро будет готов, а пока ждите миллиард лет...</p>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой сайт</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f3e8ff 0%, #ffecf3 50%, #e0f2ff 100%);
+            font-family: system-ui, sans-serif;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            gap: 3rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: #3730a3;
+            margin: 0.5rem 0;
+        }
+
+        .hero p {
+            color: #4a5568;
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            object-fit: contain;
+        }
+
+        .project-title {
+            font-size: 1.25rem;
+            color: #3730a3;
+            margin: 1rem 0 0.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-icon {
+            width: 32px;
+            height: 32px;
+            transition: transform 0.2s;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .text-block {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero of the year section -->
+        <div class="hero">
+            <h1>Лук Лукин</h1>
+            <p>Любитель-backend-разработчик с страстью к созданию некрасивых, но функциональных веб-"приложений"</p>
+        </div>
+
+        <!-- Мои проекты -->
+        <section>
+            <h2 class="text-2xl font-bold mb-6 text-center text-purple-900">Мои проекты😏</h2>
+            <div class="projects-grid" id="projects"></div>
+        </section>
+
+        <!-- Ссылочки на соцсети -->
+        <div class="social-links" id="social"></div>
+
+        <!-- Описание меня самого -->
+        <div class="text-block">
+            <h3 class="text-xl font-semibold mb-4 text-purple-800">Обо мне</h3>
+            <p>Я: любитель создавать "сайты" и игры, любитель устанавливать разные системы на мой допотопный ноутбук, делать видео на свои YouTube-каналы.</p>
+			<p>Любимые игры: Minecraft, 𝙇𝙄𝙏𝙏𝙇𝙀 𝘽𝙄𝙂 𝙎𝙉𝘼𝙆𝙀, Cities: Skylines (1)</p>
+        </div>
+    </div>
+
+    <script>
+        // Мои ПРОЕКТЫ!!!!
+        const projects = [
+            {
+                title: 'Жиробас.ехе (УСТАРЕЛО)',
+                icon: 'https://placehold.co/64x64/png?text=Ж.Е&font=roboto',
+                link: 'https://gamejolt.com/games/zhirobas/648406'
+            },
+            {
+                title: 'FejerMil SC (скоро)',
+                icon: 'https://placehold.co/64x64/png?text=FM&font=roboto',
+                link: '/fejermil'
+            },
+            {
+                title: 'Мини-проекты (скоро)',
+                icon: 'https://placehold.co/64x64/png?text=МП&font=roboto',
+                link: '/miniprojects'
+            }
+        ];
+
+        // Социальные сети
+        const socialMedia = [
+            {
+                name: 'YouTube канал',
+                icon: 'https://luklukin.ru/icons/yt.png',
+                link: 'https://www.youtube.com/@LUKLUKINyt'
+            },
+            {
+                name: 'YouTube канал №2',
+                icon: 'https://luklukin.ru/icons/yt.png',
+                link: 'https://www.youtube.com/@Лукин-2'
+            },
+            {
+                name: 'Telegram',
+                icon: 'https://luklukin.ru/icons/tg.png',
+                link: 'https://t.me/luklukinNew'
+            },
+			{
+                name: 'Discord-сервер (скоро)',
+                icon: 'https://luklukin.ru/icons/dc.png',
+                link: '#'
+            }
+        ];
+
+        // Мои проекты рендер
+        function renderProjects() {
+            const container = document.getElementById('projects');
+            container.innerHTML = projects.map(project => `
+                <a href="${project.link}" class="project-card group">
+                    <img src="${project.icon}" alt="${project.title}" class="project-icon">
+                    <div class="project-title">${project.title}</div>
+                </a>
+            `).join('');
+        }
+
+        // То же самое с соцсетями
+        function renderSocial() {
+            const container = document.getElementById('social');
+            container.innerHTML = socialMedia.map(item => `
+                <a href="${item.link}" target="_blank" rel="noopener">
+                    <img src="${item.icon}" alt="${item.name}" class="social-icon">
+                </a>
+            `).join('');
+        }
+
+        // Инициализация
+        renderProjects();
+        renderSocial();
+    </script>
 </body>
 </html>
+"Copyright" 2025 Лук Лукин
