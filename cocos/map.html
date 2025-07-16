@@ -1,0 +1,369 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивная карта</title>
+    <style>
+        /* Базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'map', 'Segoe UI', sans-serif;
+            overflow: hidden;
+            background-color: #1a202c;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        .map-wrapper {
+            position: absolute;
+            transform-origin: top left;
+            will-change: transform;
+        }
+
+        .map-image {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s ease;
+            z-index: 100;
+        }
+
+        .marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .marker-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background: white;
+            color: #1a202c;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 200;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid white;
+        }
+
+        .marker:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .controls {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-button {
+            width: 32px;
+            height: 32px;
+            background: #f7fafc;
+            border: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .control-button:hover {
+            background: #edf2f7;
+        }
+
+        .control-button svg {
+            width: 20px;
+            height: 20px;
+            stroke: #4a5568;
+        }
+
+        @media (max-width: 600px) {
+            .control-button {
+                width: 28px;
+                height: 28px;
+            }
+
+            .control-button svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+		@font-face {
+  font-family: 'map';
+  src: url('map.woff2') format('woff2'), /* Современные браузеры */
+       url('map.woff') format('woff'), /* Устаревшие версии браузеров */
+}
+    </style>
+</head>
+<body>
+    <div class="map-container" id="mapContainer">
+        <div class="map-wrapper" id="mapWrapper">
+            <img src="map.png" alt="Карта" class="map-image" id="mapImage" draggable="false" ondragstart="return false;">
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-button" id="zoomIn" aria-label="Увеличить">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="control-button" id="zoomOut" aria-label="Уменьшить">
+            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="control-button" id="reset" aria-label="Сбросить">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 15V19L16 15H12Z"/>
+                <path d="M12 9V5L8 9H12Z"/>
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // Конфигурация
+        const config = {
+            mapSize: { width: 1248, height: 1712 },
+            zoom: {
+                min: 0.1,
+                max: 9,
+                step: 0.1
+            },
+            markers: [
+                {
+                    id: 1,
+                    x: 920,
+                    y: 700,
+                    label: 'Черноруссия',
+                    color: '#090909'
+                },
+                {
+                    id: 2,
+                    x: 750,
+                    y: 1000,
+                    label: 'Фуснакс',
+                    color: '#F90909'
+                },
+                {
+                    id: 3,
+                    x: 780,
+                    y: 890,
+                    label: 'Бульвания',
+                    color: '#F97909'
+                },
+				{
+                    id: 4,
+                    x: 780,
+                    y: 950,
+                    label: 'Тхум',
+                    color: '#F9F909'
+                },
+				{
+                    id: 5,
+                    x: 780,
+                    y: 1140,
+                    label: 'Искра',
+                    color: '#F9F9F9'
+                },
+				{
+                    id: 6,
+                    x: 1100,
+                    y: 1230,
+                    label: 'Босхэлла',
+                    color: '#7909F9'
+                }
+				
+            ]
+        };
+
+        // DOM элементы
+        const mapContainer = document.getElementById('mapContainer');
+        const mapWrapper = document.getElementById('mapWrapper');
+        const mapImage = document.getElementById('mapImage');
+
+        // Состояние
+        let scale = 1;
+        let position = { x: 0, y: 0 };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+
+        // Создаем маркеры
+        config.markers.forEach(marker => {
+            const markerElement = document.createElement('div');
+            markerElement.className = 'marker';
+            
+            const dot = document.createElement('div');
+            dot.className = 'marker-dot';
+            dot.style.backgroundColor = marker.color;
+            
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.textContent = marker.label;
+            
+            markerElement.appendChild(dot);
+            markerElement.appendChild(tooltip);
+            mapContainer.appendChild(markerElement);
+
+            // Сохраняем данные
+            markerElement.dataset.x = marker.x;
+            markerElement.dataset.y = marker.y;
+        });
+
+        // Обновляем позиции маркеров
+        function updateMarkers() {
+            document.querySelectorAll('.marker').forEach(marker => {
+                const x = parseFloat(marker.dataset.x);
+                const y = parseFloat(marker.dataset.y);
+                
+                const left = x * scale + position.x;
+                const top = y * scale + position.y;
+                
+                marker.style.left = `${left}px`;
+                marker.style.top = `${top}px`;
+            });
+        }
+
+        // Обработчики событий
+        function handleWheel(e) {
+            e.preventDefault();
+            
+            const delta = e.deltaY * -0.001;
+            const newScale = Math.min(Math.max(scale + delta, config.zoom.min), config.zoom.max);
+            
+            if (newScale !== scale) {
+                const rect = mapContainer.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                const offsetX = (mouseX / rect.width) * (config.mapSize.width * (newScale - scale));
+                const offsetY = (mouseY / rect.height) * (config.mapSize.height * (newScale - scale));
+                
+                position = {
+                    x: position.x - offsetX,
+                    y: position.y - offsetY
+                };
+                
+                scale = newScale;
+                updateMap();
+            }
+        }
+
+        function handleMouseDown(e) {
+            isDragging = true;
+            dragStart = { x: e.clientX, y: e.clientY };
+            mapContainer.style.cursor = 'grabbing';
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - dragStart.x;
+            const deltaY = e.clientY - dragStart.y;
+            
+            position = {
+                x: position.x + deltaX,
+                y: position.y + deltaY
+            };
+            
+            dragStart = { x: e.clientX, y: e.clientY };
+            updateMap();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+            mapContainer.style.cursor = 'grab';
+        }
+
+        function updateMap() {
+            mapWrapper.style.transform = `translate(${position.x}px, ${position.y}px) scale(${scale})`;
+            updateMarkers();
+        }
+
+        // Управление зумом
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            const newScale = Math.min(scale + config.zoom.step, config.zoom.max);
+            scale = newScale;
+            updateMap();
+        });
+
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            const newScale = Math.max(scale - config.zoom.step, config.zoom.min);
+            scale = newScale;
+            updateMap();
+        });
+
+        document.getElementById('reset').addEventListener('click', () => {
+            scale = 1;
+            position = { x: 0, y: 0 };
+            updateMap();
+        });
+
+        // Инициализация
+        function init() {
+            // Добавляем обработчики
+            mapContainer.addEventListener('wheel', handleWheel, { passive: false });
+            mapContainer.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            
+            // Инициализируем маркеры
+            updateMarkers();
+        }
+
+        // Запуск
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
+```
