@@ -1407,6 +1407,8 @@ function drawIcon(){
 const CDNS=[
   {ff:'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd',core:'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'},
   {ff:'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/umd',core:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd'}
+  {ff:'https://cdnjs.cloudflare.com/ajax/libs/ffmpeg/0.12.15/umd',core:'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd'}
+  
 ];
 let ffmpeg=null,engineState='idle',enginePromise=null,encMode='libvorbis',loadAbort=null,lastErrLog=[];
 function setChip(){
